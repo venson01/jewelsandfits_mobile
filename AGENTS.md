@@ -1,5 +1,21 @@
 This is an Expo/React Native mobile application. Prioritize mobile-first patterns, performance, and cross-platform compatibility.
 
+## Jewels & Fits by saRizona: the shop app
+
+The mobile app for the Jewels & Fits online jewellery store. The website lives in `../jewelsandfits` (GitHub `venson01/jewelsandfits`); its `AGENTS.md` is the source of truth for the brand, business rules and the API this app calls (§5 "Mobile app API").
+
+- **Data:** everything comes from the website's JSON API at `/api/mobile/v1` (`src/lib/api.ts`). Never compute prices or totals in the app: money is integer kobo from the server, shown with `formatMoney()`. Response types in `src/lib/types.ts` mirror the website's `src/server/mobile/serialize.ts`; update both together.
+- **API address:** the live site by default. To use a local website, copy `.env.example` to `.env.local`, set `EXPO_PUBLIC_API_URL=http://<your PC's Wi-Fi IP>:3000`, run the website with `pnpm dev -H 0.0.0.0`, and restart Expo.
+- **Fetching:** TanStack Query hooks in `src/lib/queries.ts`. **Bag:** Zustand store saved with AsyncStorage (`src/lib/bag.ts`); its prices are a display snapshot, and the bag screen re-prices via `POST /cart/quote`.
+- **Design:** tokens in `src/constants/theme.ts` match the website (plum, blush, rose gold; Cormorant Garamond headings, Jost text). Use the tokens, not raw hex. Rose gold only for large text. Light mode only.
+- **Screens:** tabs `(tabs)/index` (home), `shop`, `bag`; stack screens `product/[slug]`, `products` (listing for category/collection/bestsellers, via params), `search`.
+- `Link asChild` children need a single style object (`StyleSheet.flatten`), not an array, or Expo Router throws.
+- **Web preview** (`w` in Expo) is for layout checks only. The live API sends no CORS headers, so the web build can only load data from a local website in development.
+
+**Status (2026-10-02):** browsing, search, product pages and the bag are built. Next: Google sign-in (needs Android/iOS OAuth clients), synced cart and wishlist, checkout with Paystack, orders and account.
+
+Before finishing a change: `pnpm lint` and `pnpm typecheck`.
+
 ## Expo has changed — do not trust your training data
 
 Expo ships breaking changes every SDK release. APIs you remember are likely renamed, moved, or removed. Before writing any code that touches an Expo, EAS, or React Native API:
