@@ -43,11 +43,18 @@ export default function HomeScreen() {
             by saRizona
           </Text>
         </View>
-        <Link href="/search" asChild>
-          <Pressable style={styles.iconButton} accessibilityLabel="Search" hitSlop={8}>
-            <Icon name="search" color={colors.plum700} />
-          </Pressable>
-        </Link>
+        <View style={styles.topActions}>
+          <Link href="/wishlist" asChild>
+            <Pressable style={styles.iconButton} accessibilityLabel="Wishlist" hitSlop={8}>
+              <Icon name="heart" color={colors.plum700} />
+            </Pressable>
+          </Link>
+          <Link href="/search" asChild>
+            <Pressable style={styles.iconButton} accessibilityLabel="Search" hitSlop={8}>
+              <Icon name="search" color={colors.plum700} />
+            </Pressable>
+          </Link>
+        </View>
       </View>
 
       {isPending ? (
@@ -262,6 +269,7 @@ const styles = StyleSheet.create({
   },
   wordmark: { fontFamily: fonts.serifBold, fontSize: 26, lineHeight: 30, color: colors.plum700 },
   byline: { color: colors.plum500, marginTop: -2 },
+  topActions: { flexDirection: 'row', gap: space.sm },
   iconButton: {
     width: 44,
     height: 44,

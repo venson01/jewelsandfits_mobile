@@ -42,3 +42,6 @@ example
 /ios
 /android
 .claude
+# Firebase service account keys (secrets; upload to EAS, never commit). google-services.json is fine to commit.
+*firebase-adminsdk*.json
+service-account*.json

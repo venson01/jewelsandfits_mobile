@@ -8,9 +8,11 @@
     "scheme": "jewelsandfits",
     "userInterfaceStyle": "light",
     "ios": {
+      "bundleIdentifier": "com.sarizona.jewelsandfits",
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "com.sarizona.jewelsandfits",
       "adaptiveIcon": {
         "backgroundColor": "#F7EEF3",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -32,11 +34,26 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "color": "#5B1F52",
+          "defaultChannel": "orders"
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "250022f6-025e-4e37-ba3a-34a8d6deef6a"
+      }
+    },
+    "owner": "venson01s-team"
   }
 }

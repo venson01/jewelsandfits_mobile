@@ -18,7 +18,7 @@ export default function BagScreen() {
   const insets = useSafeAreaInsets();
   const items = useBag((s) => s.items);
   const request = useMemo(() => items.map((i) => ({ variantId: i.variantId, quantity: i.quantity })), [items]);
-  const quote = useQuote(request);
+  const quote = useQuote({ items: request });
   const live = new Map((quote.data?.lines ?? []).map((l) => [l.variantId, l]));
 
   return (
@@ -63,10 +63,13 @@ export default function BagScreen() {
               )}
             </View>
             <Text variant="small">Delivery and any discount codes are worked out at checkout.</Text>
-            <View style={styles.notice}>
-              <Icon name="bag" size={18} color={colors.plum700} />
-              <Text style={styles.noticeText}>Checkout in the app is coming in the next update. Your bag is saved on this phone until then.</Text>
-            </View>
+            <Button
+              title="Checkout"
+              icon="arrowRight"
+              onPress={() => router.push('/checkout')}
+              disabled={!quote.data?.lines.length || quote.isPlaceholderData}
+              style={styles.checkout}
+            />
           </View>
         </ScrollView>
       )}
@@ -168,13 +171,5 @@ const styles = StyleSheet.create({
   summary: { margin: gutter, marginTop: space.xl, gap: space.md },
   summaryRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   subtotal: { fontFamily: fonts.sansSemiBold, fontSize: 18, color: colors.ink },
-  notice: {
-    flexDirection: 'row',
-    gap: space.sm,
-    padding: space.md,
-    borderRadius: radius.card,
-    backgroundColor: colors.blush100,
-    marginTop: space.sm,
-  },
-  noticeText: { flex: 1, fontFamily: fonts.sans, fontSize: 14, lineHeight: 20, color: colors.ink },
+  checkout: { marginTop: space.sm },
 });

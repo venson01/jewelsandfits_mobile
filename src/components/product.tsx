@@ -1,12 +1,13 @@
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
-import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { colors, fonts, gutter, radius, space } from '@/constants/theme';
 import { formatMoney } from '@/lib/money';
 import type { Category, ProductCard as ProductCardData } from '@/lib/types';
+import { useIsSaved, useToggleWishlist } from '@/lib/wishlist';
 
-import { Icon } from './icon';
+import { HeartIcon, Icon } from './icon';
 import { Text } from './text';
 
 export function Price({ price, compareAtPrice, size = 'sm' }: { price: number; compareAtPrice?: number | null; size?: 'sm' | 'lg' }) {
@@ -63,6 +64,7 @@ export function ProductCard({ product, width }: { product: ProductCardData; widt
               <Text style={styles.badgeText}>{badge}</Text>
             </View>
           ) : null}
+          <WishlistButton productId={product.id} name={product.name} style={styles.cardHeart} />
         </View>
         <Text variant="bodyMedium" numberOfLines={2} style={styles.name}>
           {product.name}
@@ -71,6 +73,33 @@ export function ProductCard({ product, width }: { product: ProductCardData; widt
         <Stars value={product.ratingAvg} count={product.ratingCount} />
       </Pressable>
     </Link>
+  );
+}
+
+/** Round heart button: saves the product to the account's wishlist. */
+export function WishlistButton({
+  productId,
+  name,
+  size = 34,
+  style,
+}: {
+  productId: string;
+  name: string;
+  size?: number;
+  style?: StyleProp<ViewStyle>;
+}) {
+  const saved = useIsSaved(productId);
+  const toggle = useToggleWishlist();
+  return (
+    <Pressable
+      onPress={() => toggle(productId)}
+      hitSlop={6}
+      style={[styles.heartButton, { width: size, height: size, borderRadius: size / 2 }, style]}
+      accessibilityRole="button"
+      accessibilityState={{ selected: saved }}
+      accessibilityLabel={saved ? `Remove ${name} from wishlist` : `Add ${name} to wishlist`}>
+      <HeartIcon filled={saved} size={size * 0.55} />
+    </Pressable>
   );
 }
 
@@ -155,6 +184,8 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   badgeMuted: { backgroundColor: colors.muted },
+  heartButton: { alignItems: 'center', justifyContent: 'center', backgroundColor: colors.white },
+  cardHeart: { position: 'absolute', top: space.sm, right: space.sm },
   badgeText: { fontFamily: fonts.sansMedium, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', color: colors.white },
   name: { fontSize: 14, lineHeight: 19 },
   rowContent: { paddingHorizontal: gutter, gap: space.md },

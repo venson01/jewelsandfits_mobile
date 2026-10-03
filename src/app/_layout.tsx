@@ -12,7 +12,9 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
 import { colors, fonts } from '@/constants/theme';
+import { startBagSync } from '@/lib/bag-sync';
 import { queryClient } from '@/lib/queries';
+import { restoreSession } from '@/lib/session';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -43,6 +45,12 @@ export default function RootLayout() {
     if (loaded || error) SplashScreen.hideAsync();
   }, [loaded, error]);
 
+  useEffect(() => {
+    const stopBagSync = startBagSync();
+    void restoreSession();
+    return stopBagSync;
+  }, []);
+
   // If a font fails to load, carry on with system fonts rather than a blank screen.
   if (!loaded && !error) return null;
 
@@ -63,6 +71,12 @@ export default function RootLayout() {
           <Stack.Screen name="product/[slug]" options={{ title: '' }} />
           <Stack.Screen name="products" options={{ title: 'Shop' }} />
           <Stack.Screen name="search" options={{ title: 'Search' }} />
+          <Stack.Screen name="checkout/index" options={{ title: 'Checkout' }} />
+          <Stack.Screen name="checkout/result" options={{ title: 'Your order' }} />
+          <Stack.Screen name="orders/index" options={{ title: 'My orders' }} />
+          <Stack.Screen name="orders/[orderNumber]" options={{ title: 'Order' }} />
+          <Stack.Screen name="wishlist" options={{ title: 'Wishlist' }} />
+          <Stack.Screen name="review/[productId]" options={{ title: 'Write a review', presentation: 'modal' }} />
         </Stack>
       </ThemeProvider>
     </QueryClientProvider>

@@ -137,6 +137,133 @@ export type Quote = {
   problems: string[];
 };
 
+export type User = {
+  id: string;
+  name: string | null;
+  email: string | null;
+  image: string | null;
+  phone: string | null;
+  role: 'customer' | 'admin';
+};
+
+export type Address = {
+  id: string;
+  name: string;
+  phone: string;
+  line1: string;
+  line2: string | null;
+  city: string;
+  state: string;
+  postalCode: string | null;
+  country: string;
+  isDefault: boolean;
+};
+
+/** A saved-cart line with current price and stock (GET/PUT /cart, POST /cart/merge). */
+export type CartLine = {
+  variantId: string;
+  productId: string;
+  slug: string;
+  name: string;
+  variantTitle: string;
+  image: string | null;
+  unitPrice: number;
+  stock: number;
+  quantity: number;
+};
+
+export type OrderStatus =
+  | 'pending_payment'
+  | 'paid'
+  | 'processing'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled'
+  | 'refunded'
+  | 'payment_failed';
+
+export type OrderSummary = {
+  orderNumber: string;
+  status: OrderStatus;
+  total: number;
+  currency: string;
+  itemCount: number;
+  placedAt: string;
+};
+
+export type OrderDetail = {
+  orderNumber: string;
+  status: OrderStatus;
+  canRetryPayment: boolean;
+  email: string;
+  phone: string;
+  subtotal: number;
+  discount: number;
+  shippingFee: number;
+  giftWrapFee: number;
+  tax: number;
+  total: number;
+  currency: string;
+  shippingAddress: {
+    name: string;
+    phone: string;
+    line1: string;
+    line2?: string | null;
+    city: string;
+    state: string;
+    postalCode?: string | null;
+    country: string;
+  };
+  shippingZoneName: string | null;
+  couponCode: string | null;
+  giftWrap: boolean;
+  giftMessage: string | null;
+  paymentMethod: 'online' | 'pay_on_delivery';
+  paymentChannel: string | null;
+  trackingNumber: string | null;
+  carrier: string | null;
+  placedAt: string;
+  paidAt: string | null;
+  shippedAt: string | null;
+  deliveredAt: string | null;
+  items: {
+    productId: string | null;
+    productSlug: string;
+    productName: string;
+    variantTitle: string;
+    sku: string;
+    unitPrice: number;
+    quantity: number;
+    imageUrl: string | null;
+  }[];
+  timeline: { status: OrderStatus; at: string }[];
+};
+
+/** Body of POST /checkout: the website's checkoutSchema. */
+export type CheckoutInput = {
+  email: string;
+  phone: string;
+  address: {
+    name: string;
+    phone: string;
+    line1: string;
+    line2?: string;
+    city: string;
+    state: string;
+    postalCode?: string;
+  };
+  saveAddress: boolean;
+  shippingZoneId: string;
+  giftWrap: boolean;
+  giftMessage?: string;
+  couponCode?: string;
+  paymentMethod: 'online' | 'pay_on_delivery';
+  items: { variantId: string; quantity: number }[];
+};
+
+/** checkoutUrl is null for Pay on Delivery (the order is already placed). */
+export type PlacedOrder = { orderNumber: string; checkoutUrl: string | null; paymentMethod: 'online' | 'pay_on_delivery' };
+
 export type StoreConfig = {
   currency: string;
   announcement: string;

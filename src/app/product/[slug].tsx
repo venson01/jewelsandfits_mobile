@@ -6,12 +6,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { Icon } from '@/components/icon';
-import { Price, ProductRow, SectionHeading, Stars } from '@/components/product';
+import { Price, ProductRow, SectionHeading, Stars, WishlistButton } from '@/components/product';
 import { ErrorView, LoadingView } from '@/components/states';
 import { Text } from '@/components/text';
 import { colors, fonts, gutter, radius, space } from '@/constants/theme';
 import { MAX_QUANTITY, useBag } from '@/lib/bag';
-import { useConfig, useProduct } from '@/lib/queries';
+import { useConfig, useProduct, useReviewEligibility } from '@/lib/queries';
+import { useSession } from '@/lib/session';
 import type { ProductCard, ProductDetail, Variant } from '@/lib/types';
 
 export default function ProductScreen() {
@@ -75,7 +76,12 @@ function ProductView({ product, related }: { product: ProductDetail; related: Pr
           {product.category ? (
             <Text variant="eyebrow">{product.category.name}</Text>
           ) : null}
-          <Text variant="heading">{product.name}</Text>
+          <View style={styles.titleRow}>
+            <Text variant="heading" style={styles.title}>
+              {product.name}
+            </Text>
+            <WishlistButton productId={product.id} name={product.name} size={42} style={styles.heart} />
+          </View>
           <Stars value={product.ratingAvg} count={product.ratingCount} />
           {variant ? <Price price={variant.price} compareAtPrice={variant.compareAtPrice} size="lg" /> : null}
 
@@ -284,8 +290,26 @@ function Reviews({ product }: { product: ProductDetail }) {
       ) : (
         <Text variant="small">No reviews yet. Customers can review a piece once it has been delivered.</Text>
       )}
+      <ReviewPrompt product={product} />
     </View>
   );
+}
+
+/** "Write a review" for signed-in customers whose order with this piece was delivered. */
+function ReviewPrompt({ product }: { product: ProductDetail }) {
+  const signedIn = useSession((s) => s.status === 'signedIn');
+  const { data } = useReviewEligibility(product.id, signedIn);
+  if (data?.eligible) {
+    return (
+      <Button
+        title="Write a review"
+        variant="outline"
+        onPress={() => router.push({ pathname: '/review/[productId]', params: { productId: product.id, name: product.name } })}
+      />
+    );
+  }
+  if (data?.reason === 'already_reviewed') return <Text variant="small">Thanks, you’ve reviewed this piece.</Text>;
+  return null;
 }
 
 const styles = StyleSheet.create({
@@ -294,6 +318,9 @@ const styles = StyleSheet.create({
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.blush200 },
   dotActive: { backgroundColor: colors.plum700, width: 18 },
   body: { paddingHorizontal: gutter, paddingTop: space.md, gap: space.sm },
+  titleRow: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md },
+  title: { flex: 1 },
+  heart: { backgroundColor: colors.blush100 },
   block: {
     gap: space.md,
     paddingVertical: space.xl,

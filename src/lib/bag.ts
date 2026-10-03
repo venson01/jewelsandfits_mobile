@@ -29,6 +29,8 @@ type BagState = {
   setQuantity: (variantId: string, quantity: number) => void;
   remove: (variantId: string) => void;
   clear: () => void;
+  /** Replaces the whole bag (adopting the account's saved cart). */
+  replaceAll: (items: BagItem[]) => void;
 };
 
 export const useBag = create<BagState>()(
@@ -55,6 +57,7 @@ export const useBag = create<BagState>()(
         })),
       remove: (variantId) => set((state) => ({ items: state.items.filter((i) => i.variantId !== variantId) })),
       clear: () => set({ items: [] }),
+      replaceAll: (items) => set({ items: items.filter((i) => i.quantity > 0) }),
     }),
     { name: 'jf-bag', version: 1, storage: createJSONStorage(() => AsyncStorage) },
   ),

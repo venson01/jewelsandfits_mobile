@@ -1,6 +1,6 @@
 import { QueryClient, useInfiniteQuery, useQuery } from '@tanstack/react-query';
 
-import { api, ApiError } from './api';
+import { api, ApiError, type QuoteInput } from './api';
 import type { ProductQuery } from './types';
 
 export const queryClient = new QueryClient({
@@ -36,12 +36,43 @@ export const useProducts = (q: ProductQuery) =>
     getNextPageParam: (last) => (last.offset + last.limit < last.total ? last.offset + last.limit : undefined),
   });
 
-/** Live prices and stock for the bag. Keyed by contents, so edits refetch. */
-export const useQuote = (items: { variantId: string; quantity: number }[]) =>
+/** Profile and saved addresses. Only while signed in. */
+export const useMe = (enabled: boolean) => useQuery({ queryKey: ['me'], queryFn: api.me, enabled });
+
+/**
+ * Live prices, stock, delivery fee and discount from the server. Keyed by the whole input,
+ * so any change (bag, state, code, gift wrap) refetches; the last result shows meanwhile.
+ */
+export const useQuote = (input: QuoteInput) =>
   useQuery({
-    queryKey: ['quote', items],
-    queryFn: async () => (await api.quote(items)).quote,
-    enabled: items.length > 0,
+    queryKey: ['quote', input],
+    queryFn: async () => (await api.quote(input)).quote,
+    enabled: input.items.length > 0,
     staleTime: 0,
     placeholderData: (previous) => previous,
+  });
+
+/** Whether the signed-in customer may review a product (delivered order, not yet reviewed). */
+export const useReviewEligibility = (productId: string, enabled: boolean) =>
+  useQuery({
+    queryKey: ['review-eligibility', productId],
+    queryFn: () => api.reviewEligibility(productId),
+    enabled,
+  });
+
+export const useOrders =(enabled: boolean) => useQuery({ queryKey: ['orders'], queryFn: api.orders, enabled });
+
+const SETTLED = new Set(['paid', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded', 'payment_failed']);
+
+/**
+ * One order. With `pollWhilePending`, re-checks every 3 s while payment is still being
+ * confirmed (the webhook can land a little after the customer returns), for up to a minute.
+ */
+export const useOrder = (orderNumber: string | undefined, pollWhilePending = false) =>
+  useQuery({
+    queryKey: ['order', orderNumber],
+    queryFn: async () => (await api.order(orderNumber!)).order,
+    enabled: !!orderNumber,
+    refetchInterval: (query) =>
+      pollWhilePending && query.state.dataUpdateCount < 20 && !SETTLED.has(query.state.data?.status ?? '') ? 3000 : false,
   });
